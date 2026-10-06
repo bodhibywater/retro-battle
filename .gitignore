@@ -1,0 +1,38 @@
+# Build output
+build/
+out/
+cmake-build-*/
+
+# vcpkg
+vcpkg_installed/
+
+# Machine-specific CMake configuration
+CMakeUserPresets.json
+
+# Compiler tooling
+compile_commands.json
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# OS/editor temporary files
+.DS_Store
+*~
+*.swp
+
+# Local/private game content
+assets/local/*
+!assets/local/.gitkeep
+
+data/local/*
+!data/local/.gitkeep
+
+# Runtime/server data
+*.db
+*.db-shm
+*.db-wal
+
+# Logs
+*.log
