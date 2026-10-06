@@ -8,6 +8,9 @@ project(
 
 include(CTest)
 
+find_package(raylib CONFIG REQUIRED)
+find_package(glfw3 CONFIG REQUIRED)
+
 function(retro_enable_warnings target)
     if(MSVC)
         target_compile_options(
@@ -58,6 +61,8 @@ target_link_libraries(
     retro_client
     PRIVATE
         retro_shared
+        raylib
+        glfw
 )
 
 retro_enable_warnings(retro_client)
