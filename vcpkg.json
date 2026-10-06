@@ -3,8 +3,9 @@
   "version-string": "0.1.0",
   "builtin-baseline": "886afac8da9e742ec2cde32f6300135614025e1b",
   "dependencies": [
-    "raylib",
     "boost-asio",
-    "catch2"
+    "catch2",
+    "raylib",
+    "glfw3"
   ]
 }
