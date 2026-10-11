@@ -70,16 +70,17 @@ target_link_libraries(
 
 retro_enable_warnings(retro_client)
 
-# Copy artwork next to the binary so launches don't depend on cwd.
+# Always stage artwork when building retro_client, even when building that
+# target directly. Ninja presets put the executable in CMAKE_CURRENT_BINARY_DIR.
 add_custom_target(
-    copy_overworld_assets ALL
+    copy_overworld_assets
     COMMAND "${CMAKE_COMMAND}" -E copy_directory
         "${CMAKE_CURRENT_SOURCE_DIR}/assets/public/overworld"
-        "$<TARGET_FILE_DIR:retro_client>/assets/overworld"
-    DEPENDS retro_client
+        "${CMAKE_CURRENT_BINARY_DIR}/assets/overworld"
     COMMENT "Copying overworld assets"
     VERBATIM
 )
+add_dependencies(retro_client copy_overworld_assets)
 
 add_executable(
     retro_server
@@ -102,6 +103,7 @@ if(BUILD_TESTING)
         retro_tests
         tests/version_test.cpp
         tests/world_test.cpp
+        tests/town_test.cpp
     )
 
     target_link_libraries(
@@ -109,6 +111,12 @@ if(BUILD_TESTING)
         PRIVATE
             retro_shared
             Catch2::Catch2WithMain
+    )
+
+    target_include_directories(
+        retro_tests
+        PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/client
     )
 
     retro_enable_warnings(retro_tests)
