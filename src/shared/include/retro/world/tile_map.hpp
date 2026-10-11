@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <string>
@@ -17,6 +16,7 @@ public:
 
     [[nodiscard]] bool contains(Position position) const noexcept;
     [[nodiscard]] bool is_walkable(Position position) const noexcept;
+    [[nodiscard]] char tile_at(Position position) const noexcept;
 
 private:
     std::vector<std::string> rows_;
