@@ -6,17 +6,19 @@ The goal is to build a shared pixel-art world where players can meet and challen
 
 ## Status
 
-**Early development — project bootstrap.**
+**Early development — playable single-player overworld prototype.**
 
 Currently implemented:
 
 - C++20 client, server and shared-library targets
-- Basic raylib window
-- Boost.Asio server runtime initialization
-- Catch2 unit testing
+- Pixel-art overworld with a 40×28 tile sample town
+- WASD/arrow-key movement, collision, animated walking and a following camera
+- Shared tile map and movement logic with Catch2 tests
+- Original artwork tracked under `assets/public/overworld/`
+- Boost.Asio server runtime initialization (no connections yet)
 - Linux and Windows CI builds
 
-The overworld, networking protocol and battle mechanics are not yet implemented.
+Multiplayer networking, creature battles and persistence are **not implemented yet**.
 
 ## Technology
 
@@ -92,7 +94,11 @@ On Linux:
 
 On Windows, run `retro_client.exe` and `retro_server.exe` from `build/dev`.
 
-The client currently displays a test window. The server initializes its networking runtime and exits; it does not yet accept connections.
+The client opens the sample town. Use **WASD or the arrow keys** to move; the most recently pressed direction takes precedence. The server initializes its networking runtime and exits; it does not yet accept connections.
+
+The build copies the five public overworld PNGs next to `retro_client` under `assets/overworld/`. Building `retro_client` directly also stages these assets. Run the executable normally; no special working directory is needed.
+
+The vcpkg manifest currently pins **raylib 5.5#1** because the vcpkg raylib 6.0 build caused blank windows on the Fedora development machine. Revisit this pin only after verifying normal frame presentation on both platforms.
 
 ## Development
 
@@ -124,7 +130,7 @@ Future game modes should reuse the challenge/session/result lifecycle without re
 
 ## Assets and licensing
 
-The public repository is intended to contain only original or appropriately licensed content.
+The public repository is intended to contain only original or appropriately licensed content. The five included pixel-art assets are original project work; see [`docs/ASSETS.md`](docs/ASSETS.md) for provenance and sprite dimensions.
 
 Local content packs under `assets/local/` and `data/local/` are excluded from Git. Proprietary third-party game assets must not be committed or redistributed without appropriate permission.
 
