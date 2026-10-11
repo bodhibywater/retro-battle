@@ -1,16 +1,9 @@
-#include <iostream>
 #include <string_view>
+
+#include <catch2/catch_test_macros.hpp>
 
 #include "retro/version.hpp"
 
-int main() {
-    constexpr std::string_view expected_version{"0.1.0"};
-
-    if (retro::version() != expected_version) {
-        std::cerr << "Expected version " << expected_version
-                  << ", got " << retro::version() << '\n';
-        return 1;
-    }
-
-    return 0;
+TEST_CASE("version reports the current application version") {
+    REQUIRE(retro::version() == std::string_view{"0.1.0"});
 }
