@@ -11,6 +11,7 @@ include(CTest)
 find_package(raylib CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(boost_asio CONFIG REQUIRED)
+find_package(Catch2 3 CONFIG REQUIRED)
 
 function(retro_enable_warnings target)
     if(MSVC)
@@ -92,12 +93,11 @@ if(BUILD_TESTING)
         retro_tests
         PRIVATE
             retro_shared
+            Catch2::Catch2WithMain
     )
 
     retro_enable_warnings(retro_tests)
 
-    add_test(
-        NAME retro_tests
-        COMMAND retro_tests
-    )
+    include(Catch)
+    catch_discover_tests(retro_tests)
 endif()
