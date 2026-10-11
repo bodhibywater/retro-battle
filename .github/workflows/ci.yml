@@ -64,6 +64,19 @@ jobs:
           ref: 886afac8da9e742ec2cde32f6300135614025e1b
           path: vcpkg
 
+      - name: Set vcpkg environment (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $vcpkgRoot = Join-Path $env:GITHUB_WORKSPACE "vcpkg"
+
+          if (-not (Test-Path (Join-Path $vcpkgRoot "bootstrap-vcpkg.bat"))) {
+            throw "vcpkg checkout not found at $vcpkgRoot"
+          }
+
+          "VCPKG_ROOT=$vcpkgRoot" >> $env:GITHUB_ENV
+
+
       - name: Bootstrap vcpkg (Linux)
         if: runner.os == 'Linux'
         run: |
