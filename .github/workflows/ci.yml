@@ -60,7 +60,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: microsoft/vcpkg
-          ref: 51bf87ca6e9bf3e622d84ff323bd202ab1ca0c0b
+          ref: 886afac8da9e742ec2cde32f6300135614025e1b
           path: vcpkg
 
       - name: Bootstrap vcpkg (Linux)
