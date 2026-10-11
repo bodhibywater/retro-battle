@@ -37,6 +37,8 @@ add_library(
     retro_shared
     STATIC
         src/shared/version.cpp
+        src/shared/world/tile_map.cpp
+        src/shared/world/movement.cpp
 )
 
 target_include_directories(
@@ -88,6 +90,7 @@ if(BUILD_TESTING)
     add_executable(
         retro_tests
         tests/version_test.cpp
+        tests/world_test.cpp
     )
 
     target_link_libraries(
