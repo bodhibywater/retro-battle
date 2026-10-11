@@ -11,7 +11,6 @@ include(CTest)
 find_package(raylib CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(boost_asio CONFIG REQUIRED)
-find_package(Catch2 3 CONFIG REQUIRED)
 
 function(retro_enable_warnings target)
     if(MSVC)
@@ -84,6 +83,8 @@ target_link_libraries(
 retro_enable_warnings(retro_server)
 
 if(BUILD_TESTING)
+    find_package(Catch2 3 CONFIG REQUIRED)
+
     add_executable(
         retro_tests
         tests/version_test.cpp

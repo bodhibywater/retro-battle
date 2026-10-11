@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - main
-      - chore/bootstrap-project
   pull_request:
     branches:
       - main
@@ -75,7 +74,6 @@ jobs:
           }
 
           "VCPKG_ROOT=$vcpkgRoot" >> $env:GITHUB_ENV
-
 
       - name: Bootstrap vcpkg (Linux)
         if: runner.os == 'Linux'
