@@ -124,8 +124,8 @@ void draw_world(const TileMap& map) {
     }
 }
 
-void draw_player(const PlayerState& player) {
-    // Interpolate between adjacent logical tile positions.
+
+Vector2 player_pixel_position(const PlayerState& player) {
     const float x = std::lerp(
         static_cast<float>(player.previous_tile.x),
         static_cast<float>(player.tile.x),
@@ -138,13 +138,72 @@ void draw_player(const PlayerState& player) {
         player.progress
     ) * static_cast<float>(tile_size);
 
-    // Snap to whole pixels for crisp pixel-art movement.
-    const int draw_x = static_cast<int>(std::round(x));
-    const int draw_y = static_cast<int>(std::round(y));
+    return Vector2{
+        std::round(x),
+        std::round(y)
+    };
+}
 
-    DrawRectangle(draw_x + 3, draw_y + 2, 10, 12, DARKBLUE);
-    DrawRectangle(draw_x + 5, draw_y + 4, 6, 5, BEIGE);
-    DrawRectangle(draw_x + 4, draw_y + 10, 8, 4, BLUE);
+void draw_player(const PlayerState& player) {
+    const Vector2 position = player_pixel_position(player);
+
+    const int x = static_cast<int>(position.x);
+    const int y = static_cast<int>(position.y);
+
+    DrawRectangle(x + 3, y + 2, 10, 12, DARKBLUE);
+    DrawRectangle(x + 5, y + 4, 6, 5, BEIGE);
+    DrawRectangle(x + 4, y + 10, 8, 4, BLUE);
+}
+
+Camera2D make_camera(
+    const TileMap& map,
+    const PlayerState& player
+) {
+    const Vector2 player_position = player_pixel_position(player);
+
+    const float world_width =
+        static_cast<float>(map.width() * tile_size);
+
+    const float world_height =
+        static_cast<float>(map.height() * tile_size);
+
+    const float half_width =
+        static_cast<float>(virtual_width) / 2.0f;
+
+    const float half_height =
+        static_cast<float>(virtual_height) / 2.0f;
+
+    // Centre the camera on the player's visual position.
+    const float player_centre_x =
+        player_position.x + static_cast<float>(tile_size) / 2.0f;
+
+    const float player_centre_y =
+        player_position.y + static_cast<float>(tile_size) / 2.0f;
+
+    // Prevent the camera from showing space outside the map.
+    const float camera_x = world_width > virtual_width
+        ? std::clamp(
+            player_centre_x,
+            half_width,
+            world_width - half_width
+        )
+        : world_width / 2.0f;
+
+    const float camera_y = world_height > virtual_height
+        ? std::clamp(
+            player_centre_y,
+            half_height,
+            world_height - half_height
+        )
+        : world_height / 2.0f;
+
+    Camera2D camera{};
+    camera.target = Vector2{camera_x, camera_y};
+    camera.offset = Vector2{half_width, half_height};
+    camera.rotation = 0.0f;
+    camera.zoom = 1.0f;
+
+    return camera;
 }
 
 }  // namespace
@@ -171,11 +230,17 @@ int main() {
     while (!WindowShouldClose()) {
         update_player(player, map);
 
+        const Camera2D camera = make_camera(map, player);
+
         BeginTextureMode(canvas);
         ClearBackground(BLACK);
 
+        BeginMode2D(camera);
+
         draw_world(map);
         draw_player(player);
+
+        EndMode2D();
 
         EndTextureMode();
 
