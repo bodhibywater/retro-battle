@@ -1,0 +1,13 @@
+{
+  "cmake.useCMakePresets": "always",
+  "cmake.configureOnOpen": false,
+  "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+  "files.exclude": {
+    "**/build": true,
+    "**/vcpkg_installed": true
+  },
+  "search.exclude": {
+    "**/build": true,
+    "**/vcpkg_installed": true
+  }
+}
