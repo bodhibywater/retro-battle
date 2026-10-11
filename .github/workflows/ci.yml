@@ -62,6 +62,7 @@ jobs:
           repository: microsoft/vcpkg
           ref: 886afac8da9e742ec2cde32f6300135614025e1b
           path: vcpkg
+          fetch-depth: 0
 
       - name: Set vcpkg environment (Windows)
         if: runner.os == 'Windows'
