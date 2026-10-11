@@ -47,6 +47,9 @@ inline world::TileMap make_sample_map() {
         }
     }
 
+    // Entrance to the southeastern clearing; do not strand walkable tiles.
+    set_tile(29, 22, 'g');
+
     // Pond in the southeast.
     for (int y = 17; y <= 20; ++y) {
         for (int x = 30; x <= 36; ++x) {
