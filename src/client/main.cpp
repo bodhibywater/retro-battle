@@ -3,6 +3,7 @@
 #include <cmath>
 #include <optional>
 #include <string>
+#include <vector>
 
 #include <raylib.h>
 
@@ -32,67 +33,63 @@ struct PlayerState {
     Position tile{2, 2};
     Position previous_tile{2, 2};
     float progress{1.0f};
+    std::vector<int> held_keys;
     std::optional<Direction> queued_direction;
 };
 
-std::optional<Direction> read_direction(bool pressed_only) {
-    const auto active = [pressed_only](int arrow, int letter) {
-        if (pressed_only) {
-            return IsKeyPressed(arrow) || IsKeyPressed(letter);
+std::optional<Direction> direction_for_key(int key) {
+    switch (key) {
+        case KEY_W:
+        case KEY_UP: return Direction::North;
+        case KEY_S:
+        case KEY_DOWN: return Direction::South;
+        case KEY_A:
+        case KEY_LEFT: return Direction::West;
+        case KEY_D:
+        case KEY_RIGHT: return Direction::East;
+        default: return std::nullopt;
+    }
+}
+
+void update_key_priority(PlayerState& player) {
+    std::erase_if(player.held_keys, [](int key) {
+        return !IsKeyDown(key);
+    });
+
+    for (int key = GetKeyPressed(); key != 0; key = GetKeyPressed()) {
+        if (const auto direction = direction_for_key(key)) {
+            std::erase(player.held_keys, key);
+            if (IsKeyDown(key)) {
+                player.held_keys.push_back(key);
+            }
+            player.queued_direction = direction;
         }
-
-        return IsKeyDown(arrow) || IsKeyDown(letter);
-    };
-
-    if (active(KEY_UP, KEY_W)) {
-        return Direction::North;
     }
-    if (active(KEY_DOWN, KEY_S)) {
-        return Direction::South;
-    }
-    if (active(KEY_LEFT, KEY_A)) {
-        return Direction::West;
-    }
-    if (active(KEY_RIGHT, KEY_D)) {
-        return Direction::East;
-    }
-
-    return std::nullopt;
 }
 
 void update_player(PlayerState& player, const TileMap& map) {
-    // Remember a new direction pressed during an animation.
-    if (const auto pressed = read_direction(true)) {
-        player.queued_direction = pressed;
-    }
+    update_key_priority(player);
 
-    // Finish the current movement before starting another.
     if (player.progress < 1.0f) {
         player.progress = std::min(
             1.0f,
             player.progress + GetFrameTime() / step_duration
         );
-
         if (player.progress < 1.0f) {
             return;
         }
     }
 
-    // Prefer a recent key press, then any held direction.
     auto direction = player.queued_direction;
     player.queued_direction.reset();
-
-    if (!direction) {
-        direction = read_direction(false);
+    if (!direction && !player.held_keys.empty()) {
+        direction = direction_for_key(player.held_keys.back());
     }
-
     if (!direction) {
         return;
     }
 
     const Position next = try_move(map, player.tile, *direction);
-
-    // Collision or map boundary: stay where we are.
     if (next == player.tile) {
         return;
     }
