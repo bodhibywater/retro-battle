@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <cstddef>
@@ -14,37 +13,79 @@ inline world::TileMap make_sample_map() {
     constexpr int width = 40;
     constexpr int height = 28;
 
-    std::vector<std::string> rows(
-        height, std::string(width, '.')
-    );
+    std::vector<std::string> rows(height, std::string(width, 'g'));
 
-    // Outer boundary.
+    const auto set_tile = [&rows](int x, int y, char tile) {
+        rows[static_cast<std::size_t>(y)][static_cast<std::size_t>(x)] = tile;
+    };
+
+    // Forest border and clusters. Routes remain accessible.
     for (int x = 0; x < width; ++x) {
-        rows[0][static_cast<std::size_t>(x)] = '#';
-        rows[height - 1][static_cast<std::size_t>(x)] = '#';
+        set_tile(x, 0, 't');
+        set_tile(x, height - 1, 't');
+    }
+    for (int y = 0; y < height; ++y) {
+        set_tile(0, y, 't');
+        set_tile(width - 1, y, 't');
     }
 
-    for (auto& row : rows) {
-        row.front() = '#';
-        row.back() = '#';
+    for (int x = 4; x <= 12; ++x) {
+        for (int y = 3; y <= 4; ++y) {
+            set_tile(x, y, 't');
+        }
+    }
+    for (int x = 3; x <= 8; ++x) {
+        for (int y = 19; y <= 21; ++y) {
+            set_tile(x, y, 't');
+        }
+    }
+    for (int x = 29; x <= 36; ++x) {
+        for (int y = 21; y <= 24; ++y) {
+            if (x == 29 || x == 36 || y == 21 || y == 24) {
+                set_tile(x, y, 't');
+            }
+        }
     }
 
-    // Scattered obstacles to test camera movement
-    // and collision across the larger world.
-    for (int x = 5; x <= 11; ++x) {
-        rows[5][static_cast<std::size_t>(x)] = '#';
+    // Pond in the southeast.
+    for (int y = 17; y <= 20; ++y) {
+        for (int x = 30; x <= 36; ++x) {
+            set_tile(x, y, 'w');
+        }
     }
 
-    for (int y = 9; y <= 15; ++y) {
-        rows[static_cast<std::size_t>(y)][22] = '#';
+    // Main crossroads and paths to the two houses.
+    for (int x = 2; x <= 37; ++x) {
+        set_tile(x, 14, 'p');
+        set_tile(x, 15, 'p');
+    }
+    for (int y = 5; y <= 25; ++y) {
+        set_tile(19, y, 'p');
+        set_tile(20, y, 'p');
+    }
+    for (int y = 10; y <= 15; ++y) {
+        set_tile(9, y, 'p');
+        set_tile(10, y, 'p');
+        set_tile(27, y, 'p');
+        set_tile(28, y, 'p');
     }
 
-    for (int x = 28; x <= 35; ++x) {
-        rows[19][static_cast<std::size_t>(x)] = '#';
+    // Building footprints are impassable; 'h' marks the sprite origin.
+    for (int origin_x : {7, 25}) {
+        for (int y = 6; y < 10; ++y) {
+            for (int x = origin_x; x < origin_x + 5; ++x) {
+                set_tile(x, y, 'b');
+            }
+        }
+        set_tile(origin_x, 6, 'h');
     }
 
-    for (int y = 18; y <= 23; ++y) {
-        rows[static_cast<std::size_t>(y)][8] = '#';
+    for (const auto& [x, y] : {std::pair{12, 17}, {15, 20}, {33, 9}, {23, 22}}) {
+        set_tile(x, y, 'r');
+    }
+    for (const auto& [x, y] : {std::pair{5, 9}, {14, 11}, {24, 11},
+                             {16, 23}, {25, 18}, {5, 24}}) {
+        set_tile(x, y, 'f');
     }
 
     return world::TileMap(std::move(rows));

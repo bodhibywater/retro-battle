@@ -1,4 +1,3 @@
-
 #include "retro/world/tile_map.hpp"
 
 #include <limits>
@@ -26,7 +25,9 @@ TileMap::TileMap(std::vector<std::string> rows)
             throw std::invalid_argument("Map rows must have equal width");
         }
 
-        if (row.find_first_not_of(".#") != std::string::npos) {
+        // g = grass, p = path, f = flowers; t = tree, w = water,
+        // r = rock, h = house origin, b = building footprint.
+        if (row.find_first_not_of(".#gpftwrhb") != std::string::npos) {
             throw std::invalid_argument("Map contains an unknown tile");
         }
     }
@@ -47,13 +48,25 @@ bool TileMap::contains(Position position) const noexcept {
            position.y < height();
 }
 
-bool TileMap::is_walkable(Position position) const noexcept {
+char TileMap::tile_at(Position position) const noexcept {
     if (!contains(position)) {
-        return false;
+        return '#';
     }
 
     return rows_[static_cast<std::size_t>(position.y)]
-                [static_cast<std::size_t>(position.x)] == '.';
+                [static_cast<std::size_t>(position.x)];
+}
+
+bool TileMap::is_walkable(Position position) const noexcept {
+    switch (tile_at(position)) {
+        case '.':
+        case 'g':
+        case 'p':
+        case 'f':
+            return true;
+        default:
+            return false;
+    }
 }
 
 }  // namespace retro::world

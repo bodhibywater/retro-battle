@@ -70,6 +70,17 @@ target_link_libraries(
 
 retro_enable_warnings(retro_client)
 
+# Copy artwork next to the binary so launches don't depend on cwd.
+add_custom_target(
+    copy_overworld_assets ALL
+    COMMAND "${CMAKE_COMMAND}" -E copy_directory
+        "${CMAKE_CURRENT_SOURCE_DIR}/assets/public/overworld"
+        "$<TARGET_FILE_DIR:retro_client>/assets/overworld"
+    DEPENDS retro_client
+    COMMENT "Copying overworld assets"
+    VERBATIM
+)
+
 add_executable(
     retro_server
     src/server/main.cpp
