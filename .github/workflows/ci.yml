@@ -41,6 +41,7 @@ jobs:
             ninja-build \
             pkg-config \
             autoconf \
+            autoconf-archive \
             automake \
             libtool \
             libgl1-mesa-dev \
@@ -72,7 +73,7 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          & "$env:VCPKG_ROOT/bootstrap-vcpkg.bat" -disableMetrics
+          & (Join-Path $env:VCPKG_ROOT "bootstrap-vcpkg.bat") -disableMetrics
 
       - name: Configure
         run: cmake --preset dev
