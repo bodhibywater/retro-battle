@@ -10,6 +10,7 @@ include(CTest)
 
 find_package(raylib CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
+find_package(boost_asio CONFIG REQUIRED)
 
 function(retro_enable_warnings target)
     if(MSVC)
@@ -76,6 +77,7 @@ target_link_libraries(
     retro_server
     PRIVATE
         retro_shared
+        Boost::asio
 )
 
 retro_enable_warnings(retro_server)
