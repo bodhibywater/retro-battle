@@ -11,6 +11,7 @@ include(CTest)
 find_package(raylib CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(boost_asio CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 
 function(retro_enable_warnings target)
     if(MSVC)
@@ -41,6 +42,8 @@ add_library(
         src/shared/world/movement.cpp
         src/shared/world/sample_map.cpp
         src/shared/world/player_state.cpp
+        src/shared/net/protocol.cpp
+        src/shared/net/framing.cpp
 )
 
 target_include_directories(
@@ -53,6 +56,11 @@ target_compile_features(
     retro_shared
     PUBLIC
         cxx_std_20
+)
+
+target_link_libraries(
+    retro_shared
+    PUBLIC nlohmann_json::nlohmann_json
 )
 
 retro_enable_warnings(retro_shared)
@@ -107,6 +115,7 @@ if(BUILD_TESTING)
         tests/world_test.cpp
         tests/town_test.cpp
         tests/player_state_test.cpp
+        tests/protocol_test.cpp
     )
 
     target_link_libraries(

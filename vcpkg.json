@@ -6,7 +6,8 @@
     "boost-asio",
     "catch2",
     "raylib",
-    "glfw3"
+    "glfw3",
+    "nlohmann-json"
   ],
   "overrides": [
     {
