@@ -95,6 +95,7 @@ add_dependencies(retro_client copy_overworld_assets)
 add_executable(
     retro_server
     src/server/main.cpp
+    src/server/server.cpp
 )
 
 target_link_libraries(
@@ -129,4 +130,22 @@ if(BUILD_TESTING)
 
     include(Catch)
     catch_discover_tests(retro_tests)
+
+    # Headless TCP integration test.
+    find_package(Python3 COMPONENTS Interpreter QUIET)
+
+    if(Python3_Interpreter_FOUND)
+        add_test(
+            NAME server_integration
+            COMMAND
+                "${Python3_EXECUTABLE}"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests/server_integration.py"
+                "$<TARGET_FILE:retro_server>"
+        )
+
+        set_tests_properties(
+            server_integration
+            PROPERTIES TIMEOUT 20
+        )
+    endif()
 endif()
