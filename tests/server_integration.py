@@ -98,6 +98,30 @@ def run(binary):
             assert joined["type"] == "player_joined"
             assert joined["player"]["id"] == bob_id
 
+            # Players spawn on distinct walkable tiles.
+            positions = {
+                (p["x"], p["y"])
+                for p in bob_welcome["players"]
+            }
+            assert len(positions) == 2
+
+            # Alice moves east from the initial (2,2) spawn.
+            # Both clients receive the authoritative update.
+            send(alice, {
+                "type": "move",
+                "direction": "east",
+            })
+
+            for peer in (alice, bob):
+                moved = receive(peer)
+                assert moved["type"] == "player_moved"
+                assert moved["player"] == {
+                    "id": alice_id,
+                    "x": 3,
+                    "y": 2,
+                    "facing": "east",
+                }
+
             # Disconnect the second client.
             bob.close()
 
@@ -132,6 +156,20 @@ def run(binary):
                 assert response["type"] == "welcome"
                 assert len(response["players"]) == len(extra) + 2
 
+                # Every connected player occupies a unique tile.
+                coordinates = {
+                    (p["x"], p["y"])
+                    for p in response["players"]
+                }
+                assert len(coordinates) == len(response["players"])
+
+                # New arrivals see Alice's moved position.
+                alice_state = next(
+                    p for p in response["players"]
+                    if p["id"] == alice_id
+                )
+                assert (alice_state["x"], alice_state["y"]) == (3, 2)
+
                 for old in [alice, *extra]:
                     assert receive(old)["type"] == "player_joined"
 
@@ -145,10 +183,10 @@ def run(binary):
                 "reason": "Server full",
             }
 
-            # Movement is not enabled until phase 3D.
+            # A connected client cannot start another handshake.
             send(alice, {
-                "type": "move",
-                "direction": "north",
+                "type": "hello",
+                "version": 1,
             })
 
             assert receive(alice) == {
@@ -159,7 +197,7 @@ def run(binary):
             print(
                 "Server integration passed: "
                 "handshake, joins, leaves, "
-                "validation and capacity"
+                "movement, validation and capacity"
             )
 
     finally:

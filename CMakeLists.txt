@@ -96,6 +96,7 @@ add_executable(
     retro_server
     src/server/main.cpp
     src/server/server.cpp
+    src/server/world_state.cpp
 )
 
 target_link_libraries(
@@ -117,6 +118,8 @@ if(BUILD_TESTING)
         tests/town_test.cpp
         tests/player_state_test.cpp
         tests/protocol_test.cpp
+        tests/server_world_test.cpp
+        src/server/world_state.cpp
     )
 
     target_link_libraries(
@@ -124,6 +127,12 @@ if(BUILD_TESTING)
         PRIVATE
             retro_shared
             Catch2::Catch2WithMain
+    )
+
+    target_include_directories(
+        retro_tests
+        PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/server
     )
 
     retro_enable_warnings(retro_tests)

@@ -186,7 +186,8 @@ Server::Server(asio::io_context& io, std::uint16_t port)
             asio::ip::make_address_v4("127.0.0.1"),
             port
         )
-    ) {}
+    ),
+      world_(world::make_sample_map(), world::sample_spawn) {}
 
 void Server::start() {
     std::cout
@@ -264,7 +265,20 @@ void Server::handle_message(
         return;
     }
 
-    // Movement and other commands will be handled in 3D.
+    if (const auto* move = std::get_if<net::Move>(&message)) {
+        const auto updated = world_.move(
+            *session->id(),
+            move->direction,
+            WorldState::Clock::now()
+        );
+
+        if (updated) {
+            // Send to all clients, including the player who moved.
+            broadcast(net::PlayerMoved{*updated});
+        }
+        return;
+    }
+
     session->reject("Unexpected message");
 }
 
@@ -274,35 +288,22 @@ void Server::join(const std::shared_ptr<Session>& session) {
         return;
     }
 
-    const net::PlayerId id = next_id_++;
+    const net::PlayerId id = next_id_;
+    const auto newcomer = world_.add(id);
 
-    std::vector<net::PlayerInfo> snapshot;
-
-    for (const auto& [other_id, other] : players_) {
-        snapshot.push_back({
-            other_id,
-            world::sample_spawn,
-            world::Direction::South
-        });
+    if (!newcomer) {
+        session->reject("No available spawn");
+        return;
     }
 
-    const net::PlayerInfo newcomer{
-        id,
-        world::sample_spawn,
-        world::Direction::South
-    };
-
-    snapshot.push_back(newcomer);
+    ++next_id_;
 
     --pending_;
     session->joined(id);
     players_.emplace(id, session);
 
-    session->send(
-        net::Welcome{id, std::move(snapshot)}
-    );
-
-    broadcast(net::PlayerJoined{newcomer}, id);
+    session->send(net::Welcome{id, world_.snapshot()});
+    broadcast(net::PlayerJoined{*newcomer}, id);
 
     std::cout
         << "Player " << id
@@ -316,6 +317,7 @@ void Server::disconnected(std::optional<net::PlayerId> id) {
         return;
     }
 
+    world_.remove(*id);
     players_.erase(*id);
     broadcast(net::PlayerLeft{*id});
 

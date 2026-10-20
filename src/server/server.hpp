@@ -10,6 +10,7 @@
 #include <boost/asio/ip/tcp.hpp>
 
 #include "retro/net/protocol.hpp"
+#include "world_state.hpp"
 
 namespace retro::server {
 
@@ -44,6 +45,8 @@ private:
     boost::asio::ip::tcp::acceptor acceptor_;
 
     std::map<net::PlayerId, std::shared_ptr<Session>> players_;
+
+    WorldState world_;
 
     std::size_t pending_{};
     net::PlayerId next_id_{1};
