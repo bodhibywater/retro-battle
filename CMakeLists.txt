@@ -39,6 +39,8 @@ add_library(
         src/shared/version.cpp
         src/shared/world/tile_map.cpp
         src/shared/world/movement.cpp
+        src/shared/world/sample_map.cpp
+        src/shared/world/player_state.cpp
 )
 
 target_include_directories(
@@ -104,6 +106,7 @@ if(BUILD_TESTING)
         tests/version_test.cpp
         tests/world_test.cpp
         tests/town_test.cpp
+        tests/player_state_test.cpp
     )
 
     target_link_libraries(
@@ -111,12 +114,6 @@ if(BUILD_TESTING)
         PRIVATE
             retro_shared
             Catch2::Catch2WithMain
-    )
-
-    target_include_directories(
-        retro_tests
-        PRIVATE
-            ${CMAKE_CURRENT_SOURCE_DIR}/src/client
     )
 
     retro_enable_warnings(retro_tests)

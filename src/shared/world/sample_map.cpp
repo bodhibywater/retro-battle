@@ -1,15 +1,13 @@
-#pragma once
+#include "retro/world/sample_map.hpp"
 
 #include <cstddef>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include "retro/world/tile_map.hpp"
+namespace retro::world {
 
-namespace retro::client {
-
-inline world::TileMap make_sample_map() {
+TileMap make_sample_map() {
     constexpr int width = 40;
     constexpr int height = 28;
 
@@ -91,7 +89,7 @@ inline world::TileMap make_sample_map() {
         set_tile(x, y, 'f');
     }
 
-    return world::TileMap(std::move(rows));
+    return TileMap(std::move(rows));
 }
 
-}  // namespace retro::client
+}  // namespace retro::world

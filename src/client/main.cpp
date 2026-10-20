@@ -10,18 +10,16 @@
 
 #include "retro/version.hpp"
 #include "retro/world/direction.hpp"
-#include "retro/world/movement.hpp"
+#include "retro/world/player_state.hpp"
 #include "retro/world/position.hpp"
+#include "retro/world/sample_map.hpp"
 #include "retro/world/tile_map.hpp"
-
-#include "sample_map.hpp"
 
 namespace {
 
 using retro::world::Direction;
 using retro::world::Position;
 using retro::world::TileMap;
-using retro::world::try_move;
 
 constexpr int tile_size = 16;
 constexpr int virtual_width = 320;
@@ -29,10 +27,12 @@ constexpr int virtual_height = 192;
 constexpr float step_duration = 0.16f;
 
 struct PlayerState {
-    Position tile{2, 2};
-    Position previous_tile{2, 2};
+    // Authoritative game state is platform-independent.
+    retro::world::PlayerState world{retro::world::sample_spawn, Direction::South};
+
+    // Client-only animation and keyboard state.
+    Position previous_tile{retro::world::sample_spawn};
     float progress{1.0f};
-    Direction facing{Direction::South};
     std::vector<int> held_keys;
     std::optional<Direction> queued_direction;
 };
@@ -104,14 +104,12 @@ void update_player(PlayerState& player, const TileMap& map) {
         return;
     }
 
-    player.facing = *direction;
-    const Position next = try_move(map, player.tile, *direction);
-    if (next == player.tile) {
+    const Position previous = player.world.position;
+    if (!retro::world::move_player(player.world, map, *direction)) {
         return;
     }
 
-    player.previous_tile = player.tile;
-    player.tile = next;
+    player.previous_tile = previous;
     player.progress = 0.0f;
 }
 
@@ -119,11 +117,11 @@ Vector2 player_pixel_position(const PlayerState& player) {
     return Vector2{
         std::round(std::lerp(
             static_cast<float>(player.previous_tile.x),
-            static_cast<float>(player.tile.x), player.progress
+            static_cast<float>(player.world.position.x), player.progress
         ) * static_cast<float>(tile_size)),
         std::round(std::lerp(
             static_cast<float>(player.previous_tile.y),
-            static_cast<float>(player.tile.y), player.progress
+            static_cast<float>(player.world.position.y), player.progress
         ) * static_cast<float>(tile_size))
     };
 }
@@ -216,7 +214,7 @@ void draw_ground(const TileMap& map, const Assets& assets) {
 void draw_player(const PlayerState& player, const Assets& assets) {
     const Vector2 pos = player_pixel_position(player);
     int row = 0;
-    switch (player.facing) {
+    switch (player.world.facing) {
         case Direction::South: row = 0; break;
         case Direction::West: row = 1; break;
         case Direction::East: row = 2; break;
@@ -261,12 +259,19 @@ void draw_objects_and_player(const TileMap& map, const PlayerState& player,
 }  // namespace
 
 int main() {
-    const auto map = retro::client::make_sample_map();
+    const auto map = retro::world::make_sample_map();
     PlayerState player;
     const std::string title = "Retro Battle v" + std::string{retro::version()};
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(960, 576, title.c_str());
+
+    if (!IsWindowReady()) {
+        std::cerr << "Failed to initialise the graphics window. "
+                << "Check that a graphical display is available.\n";
+        return 1;
+    }
+
     SetWindowMinSize(virtual_width, virtual_height);
     SetTargetFPS(60);
 

@@ -8,20 +8,19 @@
 #include "retro/world/direction.hpp"
 #include "retro/world/movement.hpp"
 #include "retro/world/position.hpp"
+#include "retro/world/sample_map.hpp"
 #include "retro/world/tile_map.hpp"
-
-#include "sample_map.hpp"
 
 using retro::world::Direction;
 using retro::world::Position;
 using retro::world::try_move;
 
 TEST_CASE("sample town has a valid spawn and closed outer boundary") {
-    const auto map = retro::client::make_sample_map();
+    const auto map = retro::world::make_sample_map();
 
     REQUIRE(map.width() == 40);
     REQUIRE(map.height() == 28);
-    REQUIRE(map.is_walkable(Position{2, 2}));
+    REQUIRE(map.is_walkable(retro::world::sample_spawn));
 
     for (int x = 0; x < map.width(); ++x) {
         CHECK_FALSE(map.is_walkable(Position{x, 0}));
@@ -34,8 +33,8 @@ TEST_CASE("sample town has a valid spawn and closed outer boundary") {
 }
 
 TEST_CASE("every walkable town tile is reachable from spawn") {
-    const auto map = retro::client::make_sample_map();
-    const Position spawn{2, 2};
+    const auto map = retro::world::make_sample_map();
+    const Position spawn = retro::world::sample_spawn;
     REQUIRE(map.is_walkable(spawn));
 
     const auto width = static_cast<std::size_t>(map.width());
